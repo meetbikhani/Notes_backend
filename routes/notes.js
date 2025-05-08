@@ -6,8 +6,13 @@ const auth = require('../middleware/auth');
 // Get all notes
 router.get('/', auth, async (req, res) => {
   try {
-    const notes = await Note.find().select('title createdAt');
-    res.json(notes);
+    const notes = await Note.find();
+    // Decrypt content for each note
+    const decryptedNotes = notes.map(note => {
+      const decryptedContent = note.decryptContent();
+      return { ...note.toObject(), content: decryptedContent };
+    });
+    res.json(decryptedNotes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
